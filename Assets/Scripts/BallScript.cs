@@ -7,12 +7,8 @@ public class BallScript : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        rb.linearVelocity = (Vector2.right + Vector2.up).normalized * startingVelocity;//new Vector2(Random.value, Random.value) * startingVelocity;
+        Vector2 Direction = MatchManager.Instance.ScoreLeft >= MatchManager.Instance.ScoreRight ? Vector2.left : Vector2.right;
+        rb.linearVelocity = (Direction + Vector2.down).normalized * startingVelocity;//new Vector2(Random.value, Random.value) * startingVelocity;
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 }
