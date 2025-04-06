@@ -8,12 +8,13 @@ using static Data;
 public class BotController : MonoBehaviour
 {
     private PaddleController paddle;
-    private BoxCollider2D boxCollider;
+
     private Difficulty difficulty = Difficulty.Normal;
     [SerializeField] private float hardTimeOffset = 0.2f;
     private float variableTimeOffset = 0.3f;
-    private float tickFast = 0.2f;
+    private float tickFast = 0.1f;
     private float currentTick = 0;
+    private bool doTick = true;
     public void SetDifficulty(Difficulty newDifficulty)
     {
         difficulty = newDifficulty;
@@ -21,7 +22,6 @@ public class BotController : MonoBehaviour
     private void Awake()
     {
         paddle = GetComponent<PaddleController>();
-        boxCollider = GetComponent<BoxCollider2D>();
     }
     private void Start()
     {
@@ -30,7 +30,7 @@ public class BotController : MonoBehaviour
     }
     private void Update()
     {
-        if (difficulty == Difficulty.Easy)
+        if (doTick)
         {
             currentTick += Time.deltaTime;
             if (currentTick < tickFast)
@@ -76,7 +76,7 @@ public class BotController : MonoBehaviour
     }
     private void HandleMovementNormal()
     {
-        if (Vector3.Distance(CalculateBallPosition(), transform.position) < 5f)
+        if (Vector3.Distance(CalculateBallPosition(), transform.position) < 2f)
         {
             paddle.SetDirection(GetDirection(CalculateBallPosition()));
         }
@@ -88,7 +88,7 @@ public class BotController : MonoBehaviour
     }
     private void HandleMovementHard()
     {
-        if (Vector3.Distance(CalculateBallPosition(), transform.position) < 5f)
+        if (Vector3.Distance(CalculateBallPosition(), transform.position) < 2f)
         {
             paddle.SetDirection(GetDirection(CalculateBallPosition()));
         }
@@ -114,7 +114,8 @@ public class BotController : MonoBehaviour
         {
             return Vector3.zero;
         }
-        return MatchManager.Instance.Ball.transform.position;
+
+        return CalculateVectorPositionAfterTime(MatchManager.Instance.Ball.transform.position, MatchManager.Instance.Ball.rb.linearVelocity, Time.deltaTime); ;
     }
     private Vector3 CalculateBallPositionAfterTime(float time)
     {
