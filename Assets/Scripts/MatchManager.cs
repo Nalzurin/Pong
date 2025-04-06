@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UIElements;
 using static Data;
 
 public class MatchManager : MonoBehaviour
@@ -8,7 +9,23 @@ public class MatchManager : MonoBehaviour
     [SerializeField] private GoalScript rightGoal;
     [SerializeField] private GameObject ballSpawner;
     [SerializeField] private GameObject ballPrefab;
+    [SerializeField] private GameObject leftPaddle;
+    [SerializeField] private GameObject rightPaddle;
+    public BallScript Ball;
+    public Difficulty difficulty;
 
+    private bool doCountdown;
+    private float _countdownTime;
+    public float CountdownTime
+    {
+        get { return _countdownTime; }
+        private set
+        {
+            _countdownTime = value;
+            MatchGUIManager.Instance.SetCountDownTimer(((int)value).ToString());
+
+        }
+    }
     private int _scoreLeft;
     public int ScoreLeft
     {
@@ -16,7 +33,7 @@ public class MatchManager : MonoBehaviour
         private set
         {
             _scoreLeft = value;
-            GUIManager.Instance.SetTextScoreLeft(value.ToString());
+            MatchGUIManager.Instance.SetTextScoreLeft(value.ToString());
 
         }
     }
@@ -27,7 +44,7 @@ public class MatchManager : MonoBehaviour
         private set
         {
             _scoreRight = value;
-            GUIManager.Instance.SetTextScoreRight(value.ToString());
+            MatchGUIManager.Instance.SetTextScoreRight(value.ToString());
 
         }
     }
@@ -38,7 +55,7 @@ public class MatchManager : MonoBehaviour
         private set
         {
             _timer = value;
-            GUIManager.Instance.SetTextTimer(((int)value).ToString());
+            MatchGUIManager.Instance.SetTextTimer(((int)value).ToString());
 
         }
     }
@@ -54,36 +71,57 @@ public class MatchManager : MonoBehaviour
             Instance = this;
         }
     }
-    void Start()
+    public void SetUpMatch(int timeDuration, Difficulty _difficulty, int countdown, PlayerSide playerSide)
     {
         leftGoal.SetPlayerSide(PlayerSide.Left);
         rightGoal.SetPlayerSide(PlayerSide.Right);
-        SetUpMatch();
-        BeginMatch();   
-    }
-    public void SetUpMatch()
-    {
         Instance.ScoreLeft = 0;
         Instance.ScoreRight = 0;
-        Timer = 90;
+        Timer = timeDuration;
+        difficulty = _difficulty;
+        if(playerSide == PlayerSide.Left)
+        {
+            leftPaddle.AddComponent<PlayerController>();
+            rightPaddle.AddComponent<BotController>();
 
+        }
+        else
+        {
+            rightPaddle.AddComponent<PlayerController>();
+            leftPaddle.AddComponent<BotController>();
+
+        }
+
+
+        CountdownTime = countdown;
+        doCountdown = true;
     }
     public void BeginMatch()
     {
+        MatchGUIManager.Instance.SetCountDownTimer("");
         isMatchStarted = true;
         SpawnBall();
     }
-
     public void EndMatch()
     {
         Time.timeScale = 0;
     }
     public void SpawnBall()
     {
-        Instantiate(ballPrefab, ballSpawner.transform.position, Quaternion.Euler(Vector2.zero));
+        Ball = (Instantiate(ballPrefab, ballSpawner.transform.position, Quaternion.Euler(Vector2.zero))).GetComponent<BallScript>();
     }
     private void Update()
     {
+        if (doCountdown)
+        {
+            CountdownTime -= Time.deltaTime;
+            if (CountdownTime <= 0)
+            {
+                doCountdown = false;
+                MatchGUIManager.Instance.SetCountDownTimer(((int)CountdownTime).ToString());
+                BeginMatch();
+            }
+        }
         if(isMatchStarted)
         {
             Timer -= Time.deltaTime;

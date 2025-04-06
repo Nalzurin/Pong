@@ -6,6 +6,7 @@ using static Data;
 
 public class MainMenuGUI : MonoBehaviour
 {
+    public static MainMenuGUI Instance { get; private set; }
     [SerializeField] private Button main_Play;
     [SerializeField] private Button main_Settings;
     [SerializeField] private Button main_Credits;
@@ -15,7 +16,8 @@ public class MainMenuGUI : MonoBehaviour
     [SerializeField] private TMP_Text settings_VolumeValue;
     [SerializeField] private GameObject mainObject;
     [SerializeField] private GameObject settingsObject;
-
+    [SerializeField] private GameObject playMenuObject;
+    [SerializeField] private GameObject singleplayerMenuObject;
     private MenuState state = MenuState.Main;
     delegate void StateChangedDelegate();
     event StateChangedDelegate stateChanged;
@@ -24,6 +26,8 @@ public class MainMenuGUI : MonoBehaviour
         stateChanged += MainStateChanged;
         stateChanged += SettingsStateChanged;
         stateChanged += CreditsStateChanged;
+        stateChanged += PlayMenuStateChanged;
+        stateChanged += SingleplayerMenuStateChanged;
     }
     private void MainStateChanged()
     {
@@ -51,14 +55,42 @@ public class MainMenuGUI : MonoBehaviour
     {
 
     }
+    private void PlayMenuStateChanged()
+    {
+        if (state == MenuState.Play)
+        {
+            playMenuObject.SetActive(true);
+        }
+        else
+        {
+            playMenuObject.SetActive(false);
+        }
+    }
+    private void SingleplayerMenuStateChanged()
+    {
+        if (state == MenuState.PlaySingle)
+        {
+            singleplayerMenuObject.SetActive(true);
+        }
+        else
+        {
+            singleplayerMenuObject.SetActive(false);
+        }
+    }
     public void ChangeState(MainMenuStateComponent newState)
     {
         state = newState.state;
         stateChanged?.Invoke();
     }
-
-    public void CloseGame()
+    private void Awake()
     {
-        Application.Quit();
+        if (Instance != null && Instance != this)
+        {
+            Destroy(this);
+        }
+        else
+        {
+            Instance = this;
+        }
     }
 }

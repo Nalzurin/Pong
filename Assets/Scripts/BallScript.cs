@@ -3,7 +3,8 @@ using UnityEngine;
 public class BallScript : MonoBehaviour
 {
     [SerializeField] private float startingVelocity = 10f;
-    [SerializeField] private Rigidbody2D rb;
+    [SerializeField] public Rigidbody2D rb;
+    [SerializeField] public BoxCollider2D boxCollider;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {

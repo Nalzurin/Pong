@@ -178,6 +178,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   startingVelocity: 10
   rb: {fileID: 8804927007554529541}
+  boxCollider: {fileID: 6144793555950698852}
 --- !u!96 &2347401176720955111
 TrailRenderer:
   serializedVersion: 3

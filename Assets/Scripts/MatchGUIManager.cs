@@ -2,9 +2,9 @@ using TMPro;
 using UnityEngine;
 using static Data;
 
-public class GUIManager : MonoBehaviour
+public class MatchGUIManager : MonoBehaviour
 {
-    public static GUIManager Instance { get; private set; }
+    public static MatchGUIManager Instance { get; private set; }
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -20,12 +20,12 @@ public class GUIManager : MonoBehaviour
     [SerializeField] private TMP_Text textScoreLeft;
     [SerializeField] private TMP_Text textScoreRight;
     [SerializeField] private TMP_Text textTimer;
-
+    [SerializeField] private TMP_Text countDownTimer;
     void Start()
     {
-        textScoreLeft.text = string.Empty;
-        textScoreRight.text = string.Empty;
-        textTimer.text = string.Empty;
+        textScoreLeft.text = "0";
+        textScoreRight.text = "0";
+        textTimer.text = "0";
 
     }
     public void SetTextScoreLeft(string text)
@@ -39,5 +39,9 @@ public class GUIManager : MonoBehaviour
     public void SetTextTimer(string text)
     {
         textTimer.text = text;
+    }
+    public void SetCountDownTimer(string text)
+    {
+        countDownTimer.text = text;
     }
 }
