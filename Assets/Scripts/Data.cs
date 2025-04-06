@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem.Utilities;
 
@@ -8,5 +9,9 @@ public class Data
     {
         Left, Right
     }
-
+    [Serializable]
+    public enum MenuState
+    {
+        Main, Settings, Credits, Play, PlaySingle, PlayMultiplayer
+    }
 }
