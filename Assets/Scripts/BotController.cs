@@ -11,7 +11,7 @@ public class BotController : MonoBehaviour
 
     private Difficulty difficulty = Difficulty.Normal;
     [SerializeField] private float hardTimeOffset = 0.2f;
-    private float variableTimeOffset = 0.3f;
+    public float variableTimeOffset = 1f;
     private float tickFast = 0.1f;
     private float currentTick = 0;
     private bool doTick = true;
@@ -27,6 +27,7 @@ public class BotController : MonoBehaviour
     {
         Debug.Log(MatchManager.Instance.difficulty);
         SetDifficulty(MatchManager.Instance.difficulty);
+        MatchManager.Instance.someoneScored += ResetVariableTime;
     }
     private void Update()
     {
@@ -76,7 +77,7 @@ public class BotController : MonoBehaviour
     }
     private void HandleMovementNormal()
     {
-        if (Vector3.Distance(CalculateBallPosition(), transform.position) < 2f)
+        if (Mathf.Abs(transform.position.x - CalculateBallPosition().x) < 4f)
         {
             paddle.SetDirection(GetDirection(CalculateBallPosition()));
         }
@@ -88,13 +89,13 @@ public class BotController : MonoBehaviour
     }
     private void HandleMovementHard()
     {
-        if (Vector3.Distance(CalculateBallPosition(), transform.position) < 2f)
+        if (Mathf.Abs(transform.position.x - CalculateBallPosition().x) < 4f)
         {
             paddle.SetDirection(GetDirection(CalculateBallPosition()));
         }
         else
         {
-            paddle.SetDirection(GetDirection(CalculateBallPositionAfterTimeAccountForBounce(variableTimeOffset)));
+            paddle.SetDirection(GetDirection(CalculateBallPositionAfterTimeAccountForBounce(0.01f)));
         }
     }
     private float GetDirection(Vector3 targetPosition)
@@ -115,7 +116,11 @@ public class BotController : MonoBehaviour
             return Vector3.zero;
         }
 
-        return CalculateVectorPositionAfterTime(MatchManager.Instance.Ball.transform.position, MatchManager.Instance.Ball.rb.linearVelocity, Time.deltaTime); ;
+        return MatchManager.Instance.Ball.transform.position;
+    }
+    private void ResetVariableTime()
+    {
+        variableTimeOffset = 1f;
     }
     private Vector3 CalculateBallPositionAfterTime(float time)
     {
@@ -137,33 +142,37 @@ public class BotController : MonoBehaviour
         Vector3 future = CalculateBallPositionAfterTime(time);
         float timeLeft;
         Vector3 newVector;
-        if(!WillBallBounceAtVector(start, future, out timeLeft, out newVector, time))
+        if(!WillBallBounceAtVector(start, MatchManager.Instance.Ball.rb.linearVelocity, out timeLeft, out newVector, 1f))
         {
             return future;
         }
         else
         {
+            
             Vector3 newVelocity = Vector3.Reflect(MatchManager.Instance.Ball.rb.linearVelocity, Vector3.up);
-            variableTimeOffset = Mathf.Min(variableTimeOffset -0.03f, 0.05f);
-            return CalculateVectorPositionAfterTime(newVector, newVelocity, timeLeft);
+            variableTimeOffset = Mathf.Max(variableTimeOffset -0.025f, 0.05f);
+            Debug.DrawRay(newVector, newVector + (newVelocity * time), Color.white, 1);
+            return CalculateVectorPositionAfterTime(newVector, newVelocity, time);
         }
 
     }
 
-    private bool WillBallBounceAtVector(Vector3 start, Vector3 future, out float timeLeft, out Vector3 newVector, float time = -1f)
+    private bool WillBallBounceAtVector(Vector3 start, Vector3 velocity, out float timeLeft, out Vector3 newVector, float time)
     {
-        float distance = Vector3.Distance(start, future);
+        float distance = (velocity * time).magnitude;
         float speed = 0f;
         if (time != -1)
         {
             speed = distance / time;
         }
-
-        RaycastHit hit;
-        
-        if(Physics.BoxCast(start, MatchManager.Instance.Ball.boxCollider.bounds.extents, MatchManager.Instance.Ball.rb.linearVelocity.normalized, out hit, MatchManager.Instance.Ball.transform.rotation, distance))
+        RaycastHit2D hit = Physics2D.Raycast(start, velocity.normalized, distance, LayerMask.GetMask("Walls"));
+        if (hit == true)
         {
-            if(hit.collider.CompareTag(WALLTAG))
+            Debug.Log("Will collide");
+            Debug.Log(hit.collider.tag);
+            Debug.DrawRay(start, hit.point, Color.white, 1);
+
+            if (hit.collider.CompareTag(WALLTAG))
             {
                 newVector = hit.point;
                 timeLeft = time - (hit.distance / speed);

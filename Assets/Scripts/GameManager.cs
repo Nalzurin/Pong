@@ -35,14 +35,12 @@ public class GameManager : MonoBehaviour
 
     public async void LoadMatch()
     {
-        await SceneManager.LoadSceneAsync("Game", LoadSceneMode.Additive);
-        MainMenuGUI.Instance.gameObject.SetActive(false);
+        await SceneManager.LoadSceneAsync("Game");
         MatchManager.Instance.SetUpMatch(90, aiDifficulty, 3, PlayerSide.Left);
     }
-    public void UnloadMatch()
+    public async void UnloadMatch()
     {
-        SceneManager.UnloadSceneAsync("Game");
-        MainMenuGUI.Instance.gameObject.SetActive(true);
+        await SceneManager.LoadSceneAsync("MainMenu");
         MainMenuGUI.Instance.ChangeState(new MainMenuStateComponent() { state = Data.MenuState.Main });
 
     }
@@ -62,5 +60,6 @@ public class GameManager : MonoBehaviour
         {
             Instance = this;
         }
+        DontDestroyOnLoad(this);
     }
 }

@@ -13,7 +13,8 @@ public class MatchManager : MonoBehaviour
     [SerializeField] private GameObject rightPaddle;
     public BallScript Ball;
     public Difficulty difficulty;
-
+    public delegate void SomeoneScored();
+    public event SomeoneScored someoneScored;
     private bool doCountdown;
     private float _countdownTime;
     public float CountdownTime
@@ -141,7 +142,9 @@ public class MatchManager : MonoBehaviour
         {
             ScoreLeft++;
         }
+        someoneScored?.Invoke();
         SpawnBall();
+
     }
 
 }
