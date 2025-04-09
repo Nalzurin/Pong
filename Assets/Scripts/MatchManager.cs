@@ -11,6 +11,8 @@ public class MatchManager : MonoBehaviour
     [SerializeField] private GameObject ballPrefab;
     [SerializeField] private GameObject leftPaddle;
     [SerializeField] private GameObject rightPaddle;
+    [SerializeField] public GameObject topWall;
+    [SerializeField] public GameObject bottomWall;
     public BallScript Ball;
     public Difficulty difficulty;
     public delegate void SomeoneScored();

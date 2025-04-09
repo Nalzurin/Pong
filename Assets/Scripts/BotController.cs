@@ -7,185 +7,117 @@ using static Data;
 [RequireComponent(typeof(PaddleController))]
 public class BotController : MonoBehaviour
 {
-    private PaddleController paddle;
+    public Difficulty difficulty;
+    public PaddleController paddleController;
+    [SerializeField] private float botXPosition;
+    [SerializeField] private float topLimitY;
+    [SerializeField] private float bottomLimitY;
 
-    private Difficulty difficulty = Difficulty.Normal;
-    [SerializeField] private float hardTimeOffset = 0.2f;
-    public float variableTimeOffset = 1f;
-    private float tickFast = 0.1f;
-    private float currentTick = 0;
-    private bool doTick = true;
-    public void SetDifficulty(Difficulty newDifficulty)
+    private float reactionCooldown;
+    private float errorMargin;
+    private float nextDecisionTime;
+    private float currentTargetY;
+
+    void Start()
     {
-        difficulty = newDifficulty;
+        SetDifficultyParameters();
+        currentTargetY = transform.position.y;
+        botXPosition = transform.position.x;
+        topLimitY = MatchManager.Instance.topWall.transform.position.y;
+        bottomLimitY = MatchManager.Instance.bottomWall.transform.position.y;
+        paddleController = GetComponent<PaddleController>();
     }
-    private void Awake()
+
+    void FixedUpdate()
     {
-        paddle = GetComponent<PaddleController>();
-    }
-    private void Start()
-    {
-        Debug.Log(MatchManager.Instance.difficulty);
-        SetDifficulty(MatchManager.Instance.difficulty);
-        MatchManager.Instance.someoneScored += ResetVariableTime;
-    }
-    private void Update()
-    {
-        if (doTick)
+        BallScript ballObj = MatchManager.Instance?.Ball;
+
+        if (ballObj == null)
         {
-            currentTick += Time.deltaTime;
-            if (currentTick < tickFast)
+            paddleController.SetDirection(0f); // No ball = do nothing
+            return;
+        }
+
+        Rigidbody2D ballRb = ballObj.GetComponent<Rigidbody2D>();
+        if (IsBallApproaching(ballObj.transform.position, ballRb.linearVelocity))
+        {
+            if (Time.time >= nextDecisionTime)
             {
-                return;
+                Vector2 predicted = PredictBallImpactPoint(ballObj.transform.position, ballRb.linearVelocity);
+                currentTargetY = predicted.y + Random.Range(-errorMargin, errorMargin);
+                nextDecisionTime = Time.time + reactionCooldown;
             }
-            currentTick = 0f;
-        }
-        if (MatchManager.Instance == null)
-        {
-            return;
-        }
-        if (!MatchManager.Instance.isMatchStarted)
-        {
-            return;
-        }
-        HandleMovement();
 
-    }
-    private void HandleMovement()
-    {
-        if (MatchManager.Instance.Ball == null)
-        {
-            return;
+            float direction = Mathf.Sign(currentTargetY - transform.position.y);
+            if (Mathf.Abs(currentTargetY - transform.position.y) > 0.1f)
+            {
+                paddleController.SetDirection(direction);
+            }
+            else
+            {
+                paddleController.SetDirection(0f);
+            }
         }
-        //Debug.Log(difficulty);
-        switch (difficulty)
+        else
+        {
+            paddleController.SetDirection(0f);
+        }
+    }
+
+    void SetDifficultyParameters()
+    {
+        switch (MatchManager.Instance.difficulty)
         {
             case Difficulty.Easy:
-                HandleMovementEasy();
+                reactionCooldown = 0.7f;
+                errorMargin = 2.5f;
                 break;
+
             case Difficulty.Normal:
-                HandleMovementNormal();
+                reactionCooldown = 0.3f;
+                errorMargin = 1.5f;
                 break;
+
             case Difficulty.Hard:
-                HandleMovementHard();
+                reactionCooldown = 0f;
+                errorMargin = 0f;
                 break;
         }
     }
-    private void HandleMovementEasy()
-    {
-        paddle.SetDirection(GetDirection(CalculateBallPosition()));
-    }
-    private void HandleMovementNormal()
-    {
-        if (Mathf.Abs(transform.position.x - CalculateBallPosition().x) < 4f)
-        {
-            paddle.SetDirection(GetDirection(CalculateBallPosition()));
-        }
-        else
-        {
-            paddle.SetDirection(GetDirection(CalculateBallPositionAfterTime(hardTimeOffset)));
-        }
 
-    }
-    private void HandleMovementHard()
+    bool IsBallApproaching(Vector2 ballPos, Vector2 ballVelocity)
     {
-        if (Mathf.Abs(transform.position.x - CalculateBallPosition().x) < 4f)
-        {
-            paddle.SetDirection(GetDirection(CalculateBallPosition()));
-        }
-        else
-        {
-            paddle.SetDirection(GetDirection(CalculateBallPositionAfterTimeAccountForBounce(0.01f)));
-        }
-    }
-    private float GetDirection(Vector3 targetPosition)
-    {
-        if (transform.position.y< targetPosition.y)
-        {
-            return 1f;
-        }
-        else
-        {
-            return -1f;
-        }
-    }
-    private Vector3 CalculateBallPosition()
-    {
-        if (MatchManager.Instance.Ball == null)
-        {
-            return Vector3.zero;
-        }
-
-        return MatchManager.Instance.Ball.transform.position;
-    }
-    private void ResetVariableTime()
-    {
-        variableTimeOffset = 1f;
-    }
-    private Vector3 CalculateBallPositionAfterTime(float time)
-    {
-        if (MatchManager.Instance.Ball == null)
-        {
-            return Vector3.zero;
-        }
-        Vector3 start = CalculateBallPosition();
-        Vector3 future = CalculateVectorPositionAfterTime(start, MatchManager.Instance.Ball.rb.linearVelocity, time);
-        return future;
-    }
-    private Vector3 CalculateBallPositionAfterTimeAccountForBounce(float time)
-    {
-        if (MatchManager.Instance.Ball == null)
-        {
-            return Vector3.zero;
-        }
-        Vector3 start = CalculateBallPosition();
-        Vector3 future = CalculateBallPositionAfterTime(time);
-        float timeLeft;
-        Vector3 newVector;
-        if(!WillBallBounceAtVector(start, MatchManager.Instance.Ball.rb.linearVelocity, out timeLeft, out newVector, 1f))
-        {
-            return future;
-        }
-        else
-        {
-            
-            Vector3 newVelocity = Vector3.Reflect(MatchManager.Instance.Ball.rb.linearVelocity, Vector3.up);
-            variableTimeOffset = Mathf.Max(variableTimeOffset -0.025f, 0.05f);
-            Debug.DrawRay(newVector, newVector + (newVelocity * time), Color.white, 1);
-            return CalculateVectorPositionAfterTime(newVector, newVelocity, time);
-        }
-
+        return (transform.position.x < ballPos.x && ballVelocity.x < 0f) ||
+               (transform.position.x > ballPos.x && ballVelocity.x > 0f);
     }
 
-    private bool WillBallBounceAtVector(Vector3 start, Vector3 velocity, out float timeLeft, out Vector3 newVector, float time)
+    Vector2 PredictBallImpactPoint(Vector2 pos, Vector2 velocity)
     {
-        float distance = (velocity * time).magnitude;
-        float speed = 0f;
-        if (time != -1)
-        {
-            speed = distance / time;
-        }
-        RaycastHit2D hit = Physics2D.Raycast(start, velocity.normalized, distance, LayerMask.GetMask("Walls"));
-        if (hit == true)
-        {
-            Debug.Log("Will collide");
-            Debug.Log(hit.collider.tag);
-            Debug.DrawRay(start, hit.point, Color.white, 1);
+        float simulatedTime = 0f;
 
-            if (hit.collider.CompareTag(WALLTAG))
+        while ((velocity.x > 0 && pos.x < botXPosition) || (velocity.x < 0 && pos.x > botXPosition))
+        {
+            pos += velocity * Time.fixedDeltaTime;
+            simulatedTime += Time.fixedDeltaTime;
+
+            if (pos.y >= topLimitY || pos.y <= bottomLimitY)
+                velocity.y *= -1;
+
+            if (simulatedTime > 5f)
             {
-                newVector = hit.point;
-                timeLeft = time - (hit.distance / speed);
-                return true;
+                break;
             }
         }
-        newVector = Vector3.zero;
-        timeLeft = 0f;
-        return false;
-    }
-    private Vector3 CalculateVectorPositionAfterTime(Vector3 start, Vector3 velocity, float time)
-    {
-        return start + (velocity * time);
 
+        float difficultyBias = Random.Range(-errorMargin, errorMargin);
+
+        if (velocity.magnitude > 10f)
+        {
+            difficultyBias *= 1.5f;
+
+        }
+
+        return new Vector2(pos.x, pos.y + difficultyBias);
     }
 }
+

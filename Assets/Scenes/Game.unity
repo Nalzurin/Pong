@@ -630,6 +630,8 @@ MonoBehaviour:
   ballPrefab: {fileID: 3869147489659821790, guid: eb3baef2a6ae4394eab423a4afc4c4f3, type: 3}
   leftPaddle: {fileID: 8593532717543133026}
   rightPaddle: {fileID: 741582384}
+  topWall: {fileID: 8329171429796059102}
+  bottomWall: {fileID: 8329171429796059101}
   Ball: {fileID: 0}
   difficulty: 0
 --- !u!4 &506298084
@@ -1791,7 +1793,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7356985323389895, guid: 59a83dad14dc72940975d2dda2c99f4c, type: 3}
       propertyPath: m_NormalizedViewPortRect.y
-      value: 0.013618112
+      value: 0.02065599
       objectReference: {fileID: 0}
     - target: {fileID: 7356985323389895, guid: 59a83dad14dc72940975d2dda2c99f4c, type: 3}
       propertyPath: m_NormalizedViewPortRect.width
@@ -1799,7 +1801,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7356985323389895, guid: 59a83dad14dc72940975d2dda2c99f4c, type: 3}
       propertyPath: m_NormalizedViewPortRect.height
-      value: 0.9727638
+      value: 0.958688
       objectReference: {fileID: 0}
     - target: {fileID: 2451640028319583355, guid: 59a83dad14dc72940975d2dda2c99f4c, type: 3}
       propertyPath: m_LocalPosition.x
@@ -2051,6 +2053,16 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: aa0795070d00f7a4097f506a399cb72e, type: 3}
+--- !u!1 &8329171429796059101 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4038227815212391767, guid: aa0795070d00f7a4097f506a399cb72e, type: 3}
+  m_PrefabInstance: {fileID: 8329171429796059100}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &8329171429796059102 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5830610023591699044, guid: aa0795070d00f7a4097f506a399cb72e, type: 3}
+  m_PrefabInstance: {fileID: 8329171429796059100}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &8593532717543133025
 PrefabInstance:
   m_ObjectHideFlags: 0
