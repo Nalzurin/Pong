@@ -4,7 +4,6 @@ using static Data;
 
 public class MatchGUIManager : MonoBehaviour
 {
-    [SerializeField] private Canvas canvas;
     public static MatchGUIManager Instance { get; private set; }
     private void Awake()
     {
@@ -16,8 +15,6 @@ public class MatchGUIManager : MonoBehaviour
         {
             Instance = this;
         }
-        canvas = GetComponent<Canvas>();
-        canvas.worldCamera = Camera.main;
     }
 
     [SerializeField] private TMP_Text textScoreLeft;
