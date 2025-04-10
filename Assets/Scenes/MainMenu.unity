@@ -4108,7 +4108,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ed3cc3eb8f4deb54282b07305b8580f1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  matchDuration: 10
+  matchDuration: 90
   playerSide: 0
   countDown: 3
   aiDifficulty: 0
