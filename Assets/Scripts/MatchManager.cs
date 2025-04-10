@@ -167,6 +167,15 @@ public class MatchManager : MonoBehaviour
                 EndMatch();
             }
         }
+        if(Ball != null)
+        {
+            if (Ball.transform.position.x > 22 || Ball.transform.position.x < -22)
+            {
+                Destroy(Ball);
+                SpawnBall();
+            }
+        }
+
     }
     public void Score(PlayerSide side)
     {

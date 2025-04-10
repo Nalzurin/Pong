@@ -12,4 +12,6 @@ public class BallScript : MonoBehaviour
         rb.linearVelocity = (Direction + Vector2.down).normalized * startingVelocity;//new Vector2(Random.value, Random.value) * startingVelocity;
     }
 
+
+
 }
