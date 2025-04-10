@@ -1,9 +1,10 @@
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
 using static Data;
-
+using Random = UnityEngine.Random;
 [RequireComponent(typeof(PaddleController))]
 public class BotController : MonoBehaviour
 {
@@ -12,19 +13,32 @@ public class BotController : MonoBehaviour
     [SerializeField] private float botXPosition;
     [SerializeField] private float topLimitY;
     [SerializeField] private float bottomLimitY;
-
+    private float paddleReach = 1.5f;
+    private float ballHalfSize = 0.25f;
+    float effectiveTolerance;
     private float reactionCooldown;
     private float errorMargin;
     private float nextDecisionTime;
     private float currentTargetY;
 
+    float skillBuffer => difficulty switch
+    {
+        Difficulty.Easy => -0.75f,
+        Difficulty.Normal => -0.25f,
+        Difficulty.Hard => 0f,
+        _ => -0.25f,
+    };
+    float tolerance => Mathf.Max(0.1f, effectiveTolerance + skillBuffer); // Dead zone buffer
+
+
     void Start()
     {
         SetDifficultyParameters();
         currentTargetY = transform.position.y;
-        botXPosition = transform.position.x;
-        topLimitY = MatchManager.Instance.topWall.transform.position.y;
-        bottomLimitY = MatchManager.Instance.bottomWall.transform.position.y;
+        botXPosition = transform.position.x - 0.75f/2;
+        topLimitY = 9;
+        bottomLimitY = -9;
+        effectiveTolerance = paddleReach + ballHalfSize;
         paddleController = GetComponent<PaddleController>();
     }
 
@@ -37,31 +51,36 @@ public class BotController : MonoBehaviour
             paddleController.SetDirection(0f); // No ball = do nothing
             return;
         }
-
         Rigidbody2D ballRb = ballObj.GetComponent<Rigidbody2D>();
-        if (IsBallApproaching(ballObj.transform.position, ballRb.linearVelocity))
+        if (!IsBallApproaching(ballObj.transform.position, ballRb.linearVelocity))
         {
-            if (Time.time >= nextDecisionTime)
-            {
-                Vector2 predicted = PredictBallImpactPoint(ballObj.transform.position, ballRb.linearVelocity);
-                currentTargetY = predicted.y + Random.Range(-errorMargin, errorMargin);
-                nextDecisionTime = Time.time + reactionCooldown;
-            }
+            paddleController.SetDirection(0f);
+            return;
+            
+        }
+        if (Time.time <= nextDecisionTime)
+        {
+            paddleController.SetDirection(0f);
+            return;
+        }
+        nextDecisionTime = Time.time + reactionCooldown;
+        BotThink(ballRb, ballObj);
+    }
 
-            float direction = Mathf.Sign(currentTargetY - transform.position.y);
-            if (Mathf.Abs(currentTargetY - transform.position.y) > 0.1f)
-            {
-                paddleController.SetDirection(direction);
-            }
-            else
-            {
-                paddleController.SetDirection(0f);
-            }
+    private void BotThink(Rigidbody2D ballRb, BallScript ballObj)
+    {
+        Vector2 predicted = PredictBallImpactPoint(ballObj.transform.position, ballRb.linearVelocity);
+        currentTargetY = predicted.y + Random.Range(-errorMargin, errorMargin);
+        float direction = Mathf.Sign(currentTargetY - transform.position.y);
+        if (Mathf.Abs(currentTargetY - transform.position.y) > tolerance)
+        {
+            paddleController.SetDirection(direction);
         }
         else
         {
             paddleController.SetDirection(0f);
         }
+
     }
 
     void SetDifficultyParameters()
@@ -101,7 +120,10 @@ public class BotController : MonoBehaviour
             simulatedTime += Time.fixedDeltaTime;
 
             if (pos.y >= topLimitY || pos.y <= bottomLimitY)
-                velocity.y *= -1;
+            {
+                velocity.y *= -1.1f;
+            }
+
 
             if (simulatedTime > 5f)
             {

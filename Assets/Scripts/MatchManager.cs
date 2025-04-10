@@ -111,6 +111,8 @@ public class MatchManager : MonoBehaviour
     }
     public void SpawnBall()
     {
+        Random.InitState((int)Time.time);
+        ballSpawner.transform.position = new Vector2(0, Random.Range(-9, 9));
         Ball = (Instantiate(ballPrefab, ballSpawner.transform.position, Quaternion.Euler(Vector2.zero))).GetComponent<BallScript>();
     }
     private void Update()
