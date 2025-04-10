@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 using static Data;
 
@@ -18,6 +19,7 @@ public class MatchManager : MonoBehaviour
     public delegate void SomeoneScored();
     public event SomeoneScored someoneScored;
     private bool doCountdown;
+  
     private float _countdownTime;
     public float CountdownTime
     {
@@ -105,9 +107,39 @@ public class MatchManager : MonoBehaviour
         isMatchStarted = true;
         SpawnBall();
     }
+    public void QuitMatch()
+    {
+        Time.timeScale = 1f;
+
+        SceneManager.LoadScene("MainMenu");
+    }
+    public void PauseMatch()
+    {
+        Time.timeScale = 0f;
+    }
+    public void UnpauseMatch()
+    {
+        Time.timeScale = 1f;
+    }
     public void EndMatch()
     {
         Time.timeScale = 0;
+        bool isDraw = ScoreLeft == ScoreRight;
+        GameObject playerPaddle = leftPaddle.GetComponent<PlayerController>() != null ? leftPaddle : rightPaddle;
+        GameObject winningSide = ScoreLeft > ScoreRight ? leftPaddle : rightPaddle;
+        if (isDraw)
+        {
+            MatchGUIManager.Instance.EndMatch(2);
+            return;
+        }
+        if(playerPaddle == winningSide)
+        {
+            MatchGUIManager.Instance.EndMatch(0);
+        }
+        else
+        {
+            MatchGUIManager.Instance.EndMatch(1);
+        }
     }
     public void SpawnBall()
     {

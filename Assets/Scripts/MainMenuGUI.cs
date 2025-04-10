@@ -3,6 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using static Data;
+using static System.Net.Mime.MediaTypeNames;
 
 public class MainMenuGUI : MonoBehaviour
 {
@@ -76,6 +77,27 @@ public class MainMenuGUI : MonoBehaviour
         {
             singleplayerMenuObject.SetActive(false);
         }
+    }
+    public void SetPlayerSide(TMP_Dropdown dp)
+    {
+        GameManager.Instance.playerSide = (PlayerSide)dp.value;
+    }
+    public void SetDifficulty(TMP_Dropdown dp)
+    {
+        
+        GameManager.Instance.SwitchAIDifficulty(dp.value);
+    }
+    public void SetMatchDuration(TMP_InputField field)
+    {
+        if (string.IsNullOrEmpty(field.text))
+        {
+            return;
+        }
+        GameManager.Instance.matchDuration = int.Parse(field.text);
+    }
+    public void LaunchMatch()
+    {
+        GameManager.Instance.LoadMatch();
     }
     public void ChangeState(MainMenuStateComponent newState)
     {

@@ -52,19 +52,19 @@ public class BotController : MonoBehaviour
             return;
         }
         Rigidbody2D ballRb = ballObj.GetComponent<Rigidbody2D>();
+        if (Time.time <= nextDecisionTime)
+        {
+            return;
+        }
         if (!IsBallApproaching(ballObj.transform.position, ballRb.linearVelocity))
         {
             paddleController.SetDirection(0f);
             return;
             
         }
-        if (Time.time <= nextDecisionTime)
-        {
-            paddleController.SetDirection(0f);
-            return;
-        }
-        nextDecisionTime = Time.time + reactionCooldown;
         BotThink(ballRb, ballObj);
+        nextDecisionTime = Time.time + reactionCooldown;
+        
     }
 
     private void BotThink(Rigidbody2D ballRb, BallScript ballObj)
@@ -85,7 +85,8 @@ public class BotController : MonoBehaviour
 
     void SetDifficultyParameters()
     {
-        switch (MatchManager.Instance.difficulty)
+        difficulty = MatchManager.Instance.difficulty;
+        switch (difficulty)
         {
             case Difficulty.Easy:
                 reactionCooldown = 0.7f;
@@ -121,7 +122,8 @@ public class BotController : MonoBehaviour
 
             if (pos.y >= topLimitY || pos.y <= bottomLimitY)
             {
-                velocity.y *= -1.1f;
+                velocity.y *= -1;
+                velocity *= 1.1f;
             }
 
 

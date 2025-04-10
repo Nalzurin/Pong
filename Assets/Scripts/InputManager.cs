@@ -11,15 +11,17 @@ public class InputManager : MonoBehaviour
     {
         if (Instance != null && Instance != this)
         {
-            Destroy(this);
+            Destroy(gameObject);
+
         }
         else
         {
             Instance = this;
+            DontDestroyOnLoad(this);
+            playerInput = new InputSystem_Actions();
+            playerInput.Player.Enable();
         }
-        DontDestroyOnLoad(this);
-        playerInput = new InputSystem_Actions();
-        playerInput.Player.Enable();
+
     }
 
     public float GetMovementDirection()

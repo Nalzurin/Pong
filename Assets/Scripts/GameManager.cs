@@ -5,7 +5,9 @@ using static Data;
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
-
+    [SerializeField] public int matchDuration = 90;
+    [SerializeField] public PlayerSide playerSide = PlayerSide.Left;
+    [SerializeField] public int countDown = 3;
 
     public Difficulty aiDifficulty = Difficulty.Easy;
 
@@ -36,13 +38,16 @@ public class GameManager : MonoBehaviour
     public async void LoadMatch()
     {
         await SceneManager.LoadSceneAsync("Game");
-        MatchManager.Instance.SetUpMatch(90, aiDifficulty, 3, PlayerSide.Left);
+        MatchManager.Instance.SetUpMatch(matchDuration, aiDifficulty, countDown, playerSide);
     }
     public async void UnloadMatch()
     {
         await SceneManager.LoadSceneAsync("MainMenu");
         MainMenuGUI.Instance.ChangeState(new MainMenuStateComponent() { state = Data.MenuState.Main });
-
+        aiDifficulty = Difficulty.Easy;
+        matchDuration = 90;
+        countDown = 3;
+        playerSide = PlayerSide.Left;
     }
 
     public void CloseGame()
@@ -54,12 +59,13 @@ public class GameManager : MonoBehaviour
     {
         if (Instance != null && Instance != this)
         {
-            Destroy(this);
+            Destroy(gameObject);
         }
         else
         {
             Instance = this;
+            DontDestroyOnLoad(this);
         }
-        DontDestroyOnLoad(this);
+        
     }
 }
