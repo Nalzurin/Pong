@@ -97,6 +97,7 @@ public class MatchManager : MonoBehaviour
 
         }
 
+        Time.timeScale = 1f;
 
         CountdownTime = countdown;
         doCountdown = true;
@@ -110,8 +111,7 @@ public class MatchManager : MonoBehaviour
     public void QuitMatch()
     {
         Time.timeScale = 1f;
-
-        SceneManager.LoadScene("MainMenu");
+        GameManager.Instance.UnloadMatch();
     }
     public void PauseMatch()
     {

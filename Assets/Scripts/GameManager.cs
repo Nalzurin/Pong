@@ -43,7 +43,7 @@ public class GameManager : MonoBehaviour
     public async void UnloadMatch()
     {
         await SceneManager.LoadSceneAsync("MainMenu");
-        MainMenuGUI.Instance.ChangeState(new MainMenuStateComponent() { state = Data.MenuState.Main });
+        MainMenuGUI.Instance.ResetState();
         aiDifficulty = Difficulty.Easy;
         matchDuration = 90;
         countDown = 3;

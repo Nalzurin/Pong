@@ -101,8 +101,18 @@ public class MainMenuGUI : MonoBehaviour
     }
     public void ChangeState(MainMenuStateComponent newState)
     {
+        if (newState == null)
+        {
+            state = MenuState.Main;
+        }
         state = newState.state;
         stateChanged?.Invoke();
+    }
+    public void ResetState()
+    {
+        state = MenuState.Main;
+        stateChanged?.Invoke();
+
     }
     private void Awake()
     {

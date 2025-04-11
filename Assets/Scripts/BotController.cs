@@ -63,13 +63,14 @@ public class BotController : MonoBehaviour
             
         }
         BotThink(ballRb, ballObj);
-        nextDecisionTime = Time.time + reactionCooldown;
+        nextDecisionTime = Time.time + Time.deltaTime + reactionCooldown;
         
     }
 
     private void BotThink(Rigidbody2D ballRb, BallScript ballObj)
     {
         Vector2 predicted = PredictBallImpactPoint(ballObj.transform.position, ballRb.linearVelocity);
+        Debug.DrawLine(transform.position, predicted, Color.red, 1);
         currentTargetY = predicted.y + Random.Range(-errorMargin, errorMargin);
         float direction = Mathf.Sign(currentTargetY - transform.position.y);
         if (Mathf.Abs(currentTargetY - transform.position.y) > tolerance)
@@ -90,12 +91,12 @@ public class BotController : MonoBehaviour
         {
             case Difficulty.Easy:
                 reactionCooldown = 0.7f;
-                errorMargin = 2.5f;
+                errorMargin = 0.85f;
                 break;
 
             case Difficulty.Normal:
                 reactionCooldown = 0.3f;
-                errorMargin = 1.5f;
+                errorMargin = 0.5f;
                 break;
 
             case Difficulty.Hard:
