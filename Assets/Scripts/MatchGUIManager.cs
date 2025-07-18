@@ -40,7 +40,7 @@ public class MatchGUIManager : MonoBehaviour
                 endGameText.text = "You Win!";
                 break;
             case 1:
-                endGameText.text = "You Win!";
+                endGameText.text = "You Lose!";
                 break;
             case 2:
                 endGameText.text = "Draw!";

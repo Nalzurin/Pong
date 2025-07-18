@@ -47,6 +47,7 @@ public class GameManager : MonoBehaviour
         aiDifficulty = Difficulty.Easy;
         matchDuration = 90;
         countDown = 3;
+        Debug.Log("test");
         playerSide = PlayerSide.Left;
     }
 
